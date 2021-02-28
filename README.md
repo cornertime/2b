@@ -20,9 +20,19 @@ Automatically resets at the start & end of the `with` block.
 Tries to stop you from doing anything that's against the protocol, but may not do a
 terribly good job at it.
 
+## Library code
+
+* `estim_2b.py` - Contains the `commander`
+* `ramp.py` - Configurable linear ramp
+
 ## Example programs
 
 * `sparse_training.py` - Runs the "training" program for approx one cycle, sleeps for a while, repeats.
+* `torment.py` - Warning level followed by ouch level, with lots of quiet time in between.
+
+## Findings
+
+* Not possible to do very fast changes, each command takes ~3s to complete.
 
 ## Further reading
 

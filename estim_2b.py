@@ -4,7 +4,7 @@ from typing import Optional
 from collections import namedtuple
 from enum import IntEnum, Enum
 
-import serial
+from serial import Serial
 
 
 logger = logging.getLogger(__name__)
@@ -128,9 +128,9 @@ class Reply(namedtuple("Reply", [
 
 
 class Commander:
-    serial: Optional[serial.Serial]
+    serial: Optional[Serial]
 
-    def __init__(self, serial: Optional[serial.Serial] = None):
+    def __init__(self, serial: Optional[Serial] = None):
         """
         Do not call directly, instead use the `commander` context manager.
         """
@@ -157,6 +157,8 @@ class Commander:
 
         logger.debug('<- %r', reply_bytes)
         reply = Reply.from_bytes(reply_bytes)
+        logger.info('Got %s', reply)
+
         return reply
 
     def set_mode(self, mode: Mode):
@@ -218,15 +220,16 @@ class Commander:
 
 
 @contextmanager
-def commander(serial_port='COM1', timeout_seconds=1.0):
+def commander(serial_port='COM3', timeout_seconds=3.0):
     """
     The preferred way to get a Commander instance. Handles serial port
     opening/closing and performs a reset (E command) at both the start and end
     of the session.
     """
     commander = None
-    with serial.Serial(serial_port, BAUD_RATE, timeout=timeout_seconds):
+    with Serial(serial_port, BAUD_RATE, timeout=timeout_seconds) as serial:
         try:
+            # commander = Commander()
             commander = Commander(serial)
             commander.reset()
             yield commander
