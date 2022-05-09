@@ -218,9 +218,13 @@ class Commander:
         assert 0 <= level <= 100
         return self._send(Command(channel), level)
 
+    def set_power(self, power):
+        assert power in ['L', 'H']
+        return self._send(Command(power))
+
 
 @contextmanager
-def commander(serial_port='COM3', timeout_seconds=3.0):
+def commander(serial_port='COM3', timeout_seconds=1.0):
     """
     The preferred way to get a Commander instance. Handles serial port
     opening/closing and performs a reset (E command) at both the start and end

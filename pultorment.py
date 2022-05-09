@@ -10,18 +10,19 @@ from ramp import Ramp, Sequence
 
 logger = logging.getLogger(__name__)
 
-START = 25
-RISE = 40
+START = 50
+RISE = 30
 
 def main(
     ramp_start=START,
     ramp_end=START + RISE,
     ramp_seconds=RISE * 60,
-    warn_adjustment=2,
+    warn_adjustment=10,
     feel=80,
+    speed=90,
     warn_seconds=3,
     osc_multiplier=2,
-    active_seconds=1,
+    active_seconds=5,
     inactive_seconds_min=5,
     inactive_seconds_max=15,
 ):
@@ -31,12 +32,13 @@ def main(
 
     with commander() as cmd:
         cmd.set_power('H')
-        cmd.set_mode(Mode.CONTINUOUS)
+        cmd.set_mode(Mode.PULSE)
         cmd.set_feel(feel)
+        cmd.set_speed(speed)
 
         while True:
             base_level = ramp.get_value() + osc_multiplier * seq.get_value()
-            warn_level = base_level // warn_adjustment
+            warn_level = base_level - warn_adjustment
 
             cmd.set_level('A', warn_level)
             sleep(warn_seconds)

@@ -22,3 +22,22 @@ class Ramp:
         value = int(min(frac_passed * (self.max_value - self.min_value) + self.min_value, self.max_value))
         logger.info('Ramp: Time %d / %d seconds, value %d / %d', seconds_passed, self.period_seconds, value, self.max_value)
         return value
+
+
+class Sequence:
+    min_value: int
+    max_value: int
+
+    def __init__(self, min_value=0, max_value=5, step=1):
+        self.min_value = min_value
+        self.max_value = max_value
+        self.step = step
+
+        self.current_value = min_value
+
+    def get_value(self):
+        current_value = self.current_value
+        self.current_value += self.step
+        if self.current_value > self.max_value:
+            self.current_value = self.min_value
+        return int(current_value)
