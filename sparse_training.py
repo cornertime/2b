@@ -28,11 +28,10 @@ def main(
     active_seconds=10,
     inactive_seconds_min=5,
     inactive_seconds_max=15,
-
 ):
     ramp = Ramp(ramp_start, ramp_end, ramp_seconds)
     with commander() as cmd:
-        cmd.set_power('H')
+        cmd.set_power("H")
         cmd.set_mode(Mode.TRAINING)
         cmd.set_speed(speed)
 
@@ -42,14 +41,14 @@ def main(
             cmd.set_feel(feel)
 
             level = ramp.get_value() + fate_dice(5)
-            cmd.set_level('A', level)
+            cmd.set_level("A", level)
 
-            logger.info('Sleeping in active cycle for %d seconds', active_seconds)
+            logger.info("Sleeping in active cycle for %d seconds", active_seconds)
             sleep(active_seconds)
-            cmd.set_level('A', 0)
+            cmd.set_level("A", 0)
 
             inactive_seconds = randint(inactive_seconds_min, inactive_seconds_max)
-            logger.info('Sleeping in inactive cycle for %d seconds', inactive_seconds)
+            logger.info("Sleeping in inactive cycle for %d seconds", inactive_seconds)
             sleep(inactive_seconds)
 
 

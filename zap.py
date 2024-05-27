@@ -14,16 +14,17 @@ logger = logging.getLogger(__name__)
 def main(
     level=25,
     feel=80,
-    active_seconds=2,
+    active_seconds=0,
 ):
     with commander() as cmd:
+        cmd.set_power("H")
         cmd.set_mode(Mode.CONTINUOUS)
         cmd.set_feel(feel)
 
         while True:
-            cmd.set_level('A', level)
+            cmd.set_level("A", level)
             sleep(active_seconds)
-            cmd.set_level('A', 0)
+            cmd.set_level("A", 0)
 
             line = input()
             new_level = 0
@@ -34,7 +35,6 @@ def main(
 
             if 1 <= new_level <= 100:
                 level = new_level
-
 
 
 if __name__ == "__main__":

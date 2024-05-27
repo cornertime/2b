@@ -11,17 +11,18 @@ from ramp import Ramp, Sequence
 logger = logging.getLogger(__name__)
 
 
-START = 40
+START = 50
 RISE = 40
+
 
 def main(
     ramp_start=START,
     ramp_end=START + RISE,
     ramp_seconds=RISE * 60,
     feel=90,
-    speed=30,
-    seq_min=-20,
-    seq_max=20,
+    speed=80,
+    seq_min=-10,
+    seq_max=10,
     seq_step=2,
     step_seconds=5,
 ):
@@ -30,7 +31,7 @@ def main(
 
     with commander() as cmd:
         cmd.set_mode(Mode.PULSE)
-        cmd.set_power('H')
+        cmd.set_power("H")
         cmd.set_speed(speed)
         cmd.set_feel(feel)
 
@@ -38,7 +39,7 @@ def main(
             level = ramp.get_value()
             level += max(seq.get_value(), 0)
 
-            cmd.set_level('A', level)
+            cmd.set_level("A", level)
             sleep(step_seconds)
 
 

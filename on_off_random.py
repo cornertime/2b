@@ -11,34 +11,38 @@ from ramp import Ramp, Sequence
 logger = logging.getLogger(__name__)
 
 
-START = 20
-RISE = 40
+START = 35
+RISE = 100 - START
 
 
 def main(
     ramp_start=START,
     ramp_end=START + RISE,
     ramp_seconds=RISE * 60,
-    feel=80,
-    speed=30,
-    osc_max=10,
-    osc_period_seconds=120,
-    step_seconds=5,
+    speed=5,
+    feel=90,
+    inactive_level=25,
+    active_seconds_min=5,
+    active_seconds_max=10,
+    inactive_seconds_min=10,
+    inactive_seconds_max=40,
 ):
     ramp = Ramp(ramp_start, ramp_end, ramp_seconds)
-    osc = Oscillator(0, osc_max, osc_period_seconds)
 
     with commander() as cmd:
         cmd.set_power("H")
-        cmd.set_mode(Mode.WATERFALL)
+        cmd.set_mode(Mode.RANDOM)
         cmd.set_speed(speed)
         cmd.set_feel(feel)
 
         while True:
-            base_level = ramp.get_value() + osc.get_value()
+            active_seconds = randint(active_seconds_min, active_seconds_max)
+            cmd.set_level("A", ramp.get_value())
+            sleep(active_seconds)
 
-            cmd.set_level("A", base_level)
-            sleep(step_seconds)
+            inactive_seconds = randint(inactive_seconds_min, inactive_seconds_max)
+            cmd.set_level("A", inactive_level)
+            sleep(inactive_seconds)
 
 
 if __name__ == "__main__":

@@ -11,24 +11,20 @@ logger = logging.getLogger(__name__)
 
 
 def main(
-    ramp_start=35,
+    ramp_start=50,
     ramp_end=100,
-    warn_adjustment=3,
     feel=80,
-    warn_seconds=1,
-    active_seconds=0,
+    speed=30,
+    active_seconds=5,
     inactive_seconds=10,
 ):
     with commander() as cmd:
         cmd.set_power("H")
         cmd.set_mode(Mode.PULSE)
         cmd.set_feel(feel)
+        cmd.set_speed(speed)
 
         for base_level in range(ramp_start, ramp_end + 1):
-            warn_level = base_level // warn_adjustment
-
-            cmd.set_level("A", warn_level)
-            sleep(warn_seconds)
             cmd.set_level("A", base_level)
             sleep(active_seconds)
             cmd.set_level("A", 0)

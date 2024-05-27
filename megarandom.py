@@ -11,24 +11,25 @@ from ramp import Ramp, Sequence
 logger = logging.getLogger(__name__)
 
 
-START = 30
+START = 25
 RISE = 40
+
 
 def main(
     ramp_start=START,
     ramp_end=START + RISE,
     ramp_seconds=RISE * 60,
     feel=90,
-    speed=2,
+    speed=5,
     osc_max=10,
-    osc_period_seconds=60,
+    osc_period_seconds=90,
     step_seconds=5,
 ):
     ramp = Ramp(ramp_start, ramp_end, ramp_seconds)
     osc = Oscillator(0, osc_max, osc_period_seconds)
 
     with commander() as cmd:
-        cmd.set_power('H')
+        cmd.set_power("H")
         cmd.set_mode(Mode.RANDOM)
         cmd.set_speed(speed)
         cmd.set_feel(feel)
@@ -36,7 +37,7 @@ def main(
         while True:
             base_level = ramp.get_value() + osc.get_value()
 
-            cmd.set_level('A', base_level)
+            cmd.set_level("A", base_level)
             sleep(step_seconds)
 
 

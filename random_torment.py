@@ -1,16 +1,21 @@
 import logging
-from oscillator import Oscillator
 
 from random import randint
 from time import sleep
 
 from estim_2b import Mode, commander
-from ramp import Ramp, Sequence
+from ramp import Ramp
+from oscillator import Oscillator
 
 
 logger = logging.getLogger(__name__)
 
-START = 25
+
+def fate_dice(num_dice=4):
+    return sum(randint(-1, 1) for i in range(num_dice))
+
+
+START = 40
 RISE = 40
 
 
@@ -18,16 +23,15 @@ def main(
     ramp_start=START,
     ramp_end=START + RISE,
     ramp_seconds=RISE * 90,
-    warn_adjustment=2,
+    warn_level=13,
     feel=90,
     warn_seconds=1,
-    osc_multiplier=2,
+    dice_modifier=2,
     active_seconds=0,
     inactive_seconds_min=5,
     inactive_seconds_max=20,
 ):
     ramp = Ramp(ramp_start, ramp_end, ramp_seconds)
-    seq = Sequence()
     time_osc = Oscillator(inactive_seconds_min, inactive_seconds_max, 120)
 
     with commander() as cmd:
@@ -36,12 +40,12 @@ def main(
         cmd.set_feel(feel)
 
         while True:
-            base_level = ramp.get_value() + osc_multiplier * seq.get_value()
-            warn_level = base_level // warn_adjustment
+            base_level = ramp.get_value()
+            level = base_level + dice_modifier * abs(fate_dice())
 
             cmd.set_level("A", warn_level)
             sleep(warn_seconds)
-            cmd.set_level("A", base_level)
+            cmd.set_level("A", level)
             sleep(active_seconds)
             cmd.set_level("A", 0)
 

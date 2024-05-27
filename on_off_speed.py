@@ -11,40 +11,40 @@ from ramp import Ramp, Sequence
 logger = logging.getLogger(__name__)
 
 
-START = 40
-RISE = 40
+START = 55
+RISE = 100 - START
+
+MIN_SPEED = 20
+MAX_SPEED = 85
 
 
 def main(
     ramp_start=START,
     ramp_end=START + RISE,
     ramp_seconds=RISE * 60,
-    speed=5,
     feel=90,
-    osc_multiplier=1,
-    active_seconds=0,
-    inactive_seconds_min=5,
-    inactive_seconds_max=20,
+    active_seconds_min=2,
+    active_seconds_max=6,
+    inactive_seconds_min=10,
+    inactive_seconds_max=40,
 ):
     ramp = Ramp(ramp_start, ramp_end, ramp_seconds)
-    seq = Sequence()
-    time_osc = Oscillator(inactive_seconds_min, inactive_seconds_max, 120)
 
     with commander() as cmd:
         cmd.set_power("H")
-        cmd.set_mode(Mode.CONTINUOUS)
-        # cmd.set_speed(speed)
+        cmd.set_mode(Mode.PULSE)
         cmd.set_feel(feel)
 
         while True:
-            base_level = ramp.get_value() + osc_multiplier * seq.get_value()
+            speed = randint(MIN_SPEED, MAX_SPEED)
+            cmd.set_speed(speed)
 
-            cmd.set_level("A", base_level)
+            active_seconds = randint(active_seconds_min, active_seconds_max)
+            cmd.set_level("A", ramp.get_value())
             sleep(active_seconds)
-            cmd.set_level("A", 0)
 
-            # inactive_seconds = randint(inactive_seconds_min, inactive_seconds_max)
-            inactive_seconds = time_osc.get_value()
+            inactive_seconds = randint(inactive_seconds_min, inactive_seconds_max)
+            cmd.set_level("A", 0)
             sleep(inactive_seconds)
 
 
