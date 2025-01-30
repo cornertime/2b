@@ -1,12 +1,10 @@
 import logging
-from oscillator import Oscillator
-
 from random import randint
 from time import sleep
 
 from estim_2b import Mode, commander
+from oscillator import Oscillator
 from ramp import Ramp, Sequence
-
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +44,7 @@ def main(
             cmd.set_feel(heaven_feel)
             cmd.set_speed(heaven_speed)
             cmd.set_level("A", base_level + a_adjustment)
-            cmd.set_level("B", base_level)
+            # cmd.set_level("B", base_level)
 
             heaven_seconds = randint(heaven_seconds_min, heaven_seconds_max)
             sleep(heaven_seconds)
@@ -55,7 +53,7 @@ def main(
             cmd.set_feel(hell_feel)
             cmd.set_speed(hell_speed)
             cmd.set_level("A", base_level + a_adjustment + hell_adjustment)
-            cmd.set_level("B", base_level + hell_adjustment)
+            # cmd.set_level("B", base_level + hell_adjustment)
 
             hell_seconds = randint(hell_seconds_min, hell_seconds_max)
             sleep(hell_seconds)
@@ -65,7 +63,6 @@ def main(
 
             # inactive_seconds = randint(inactive_seconds_min, inactive_seconds_max)
             # sleep(inactive_seconds)
-
 
 
 if __name__ == "__main__":

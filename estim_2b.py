@@ -1,15 +1,16 @@
-from contextlib import contextmanager
 import logging
-from typing import Optional
+import platform
 from collections import namedtuple
-from enum import IntEnum, Enum
+from contextlib import contextmanager
+from enum import Enum, IntEnum
+from typing import Optional
 
 from serial import Serial
-
 
 logger = logging.getLogger(__name__)
 FAKE_REPLY_BYTES = b"100:40:0:50:50:13:L:0:1.04\r"
 BAUD_RATE = 9600
+SERIAL_PORT = "COM3" if platform.system() == "Windows" else "/dev/cu.usbserial-FTGZ75LA"
 
 
 class Mode(IntEnum):
@@ -32,70 +33,75 @@ class Mode(IntEnum):
 
 
 FEEL_PARAM_BY_MODE = {
-    Mode.PULSE: 'D',
-    Mode.BOUNCE: 'D',
-    Mode.CONTINUOUS: 'C',
-    Mode.A_SPLIT: 'D',
-    Mode.B_SPLIT: 'D',
-    Mode.WAVE: 'D',
-    Mode.WATERFALL: 'D',
-    Mode.SQUEEZE: 'D',
-    Mode.MILK: 'D',
-    Mode.THROB: 'C',
-    Mode.THRUST: 'C',
-    Mode.RANDOM: 'D',
-    Mode.STEP: 'D',
-    Mode.TRAINING: 'D',
-    Mode.MICROPHONE: 'C',
-    Mode.STEREO: 'C',
+    Mode.PULSE: "D",
+    Mode.BOUNCE: "D",
+    Mode.CONTINUOUS: "C",
+    Mode.A_SPLIT: "D",
+    Mode.B_SPLIT: "D",
+    Mode.WAVE: "D",
+    Mode.WATERFALL: "D",
+    Mode.SQUEEZE: "D",
+    Mode.MILK: "D",
+    Mode.THROB: "C",
+    Mode.THRUST: "C",
+    Mode.RANDOM: "D",
+    Mode.STEP: "D",
+    Mode.TRAINING: "D",
+    Mode.MICROPHONE: "C",
+    Mode.STEREO: "C",
 }
 
 SPEED_PARAM_BY_MODE = {
-    Mode.PULSE: 'C',
-    Mode.BOUNCE: 'C',
-    Mode.A_SPLIT: 'C',
-    Mode.B_SPLIT: 'C',
-    Mode.WAVE: 'C',
-    Mode.WATERFALL: 'C',
-    Mode.SQUEEZE: 'C',
-    Mode.MILK: 'C',
-    Mode.RANDOM: 'C',
+    Mode.PULSE: "C",
+    Mode.BOUNCE: "C",
+    Mode.A_SPLIT: "C",
+    Mode.B_SPLIT: "C",
+    Mode.WAVE: "C",
+    Mode.WATERFALL: "C",
+    Mode.SQUEEZE: "C",
+    Mode.MILK: "C",
+    Mode.RANDOM: "C",
 }
 
 DELAY_PARAM_BY_MODE = {
-    Mode.STEP: 'C',
-    Mode.TRAINING: 'C',
+    Mode.STEP: "C",
+    Mode.TRAINING: "C",
 }
 
 
 class Command(Enum):
-    A_LEVEL = 'A'
-    B_LEVEL = 'B'
-    C_SETTING = 'C'
-    D_SETTING = 'D'
-    RESET = 'E'
-    HIGH_POWER = 'H'
-    JOIN_CHANNELS = 'J'
-    ZERO = 'K'
-    LOW_POWER = 'L'
-    MODE = 'M'
-    UNLINK_CHANNELS = 'U'
+    A_LEVEL = "A"
+    B_LEVEL = "B"
+    C_SETTING = "C"
+    D_SETTING = "D"
+    RESET = "E"
+    HIGH_POWER = "H"
+    JOIN_CHANNELS = "J"
+    ZERO = "K"
+    LOW_POWER = "L"
+    MODE = "M"
+    UNLINK_CHANNELS = "U"
 
 
 EXPECTED_DEFAULTS = [0, 0, 50, 50, Mode.PULSE]
 
 
-class Reply(namedtuple("Reply", [
-    "battery_level",
-    "a_level",
-    "b_level",
-    "c_setting",
-    "d_setting",
-    "mode",
-    "power_setting",
-    "channels_joined",
-    "firmware_version"
-])):
+class Reply(
+    namedtuple(
+        "Reply",
+        [
+            "battery_level",
+            "a_level",
+            "b_level",
+            "c_setting",
+            "d_setting",
+            "mode",
+            "power_setting",
+            "channels_joined",
+            "firmware_version",
+        ],
+    )
+):
     @classmethod
     def from_bytes(cls, data: bytes):
         """
@@ -112,7 +118,7 @@ class Reply(namedtuple("Reply", [
             power_setting,
             channels_joined,
             firmware_version,
-        ) = data.decode('ASCII').strip().split(':')
+        ) = data.decode("ASCII").strip().split(":")
 
         return cls(
             int(battery_level),
@@ -142,36 +148,36 @@ class Commander:
         Do not call directly, instead use the `reset`, `set_mode`, `set_feel`, `set_level`
         and `set_speed` methods.
         """
-        logger.info(f'Sending %s %s', command, '' if param is None else param)
+        logger.info("Sending %s %s", command, "" if param is None else param)
         param_str = "" if param is None else str(param)
         cmd_bytes = f"{command.value}{param_str}\r".encode()
-        logger.debug('-> %r', cmd_bytes)
+        logger.debug("-> %r", cmd_bytes)
 
         if self.serial:
             # Actual serial port mode
             self.serial.write(cmd_bytes)
-            reply_bytes = self.serial.read_until(b'\r')
+            reply_bytes = self.serial.read_until(b"\r")
         else:
             # Dry run mode
             reply_bytes = FAKE_REPLY_BYTES
 
-        logger.debug('<- %r', reply_bytes)
+        logger.debug("<- %r", reply_bytes)
         reply = Reply.from_bytes(reply_bytes)
-        logger.info('Got %s', reply)
+        logger.info("Got %s", reply)
 
         return reply
 
     def set_mode(self, mode: Mode):
         reply = self._send(Command.MODE, mode.value)
         if reply.mode != mode:
-            raise TypeError(f'Requested mode {mode.value}, device reported {reply}')
+            raise TypeError(f"Requested mode {mode.value}, device reported {reply}")
         self.mode = mode
 
     def reset(self):
         """
         Sets A = 0, B = 0, C = 50, D = 50, mode = PULSE.
         """
-        reply = self._send(Command.RESET)
+        _reply = self._send(Command.RESET)
         # if [reply.a_level, reply.b_level, reply.c_setting, reply.d_setting, reply.mode] != EXPECTED_DEFAULTS:
         #     raise TypeError(f'State not as expected after reset: {reply}')
 
@@ -184,7 +190,7 @@ class Commander:
         assert 2 <= feel <= 99
         feel_param = FEEL_PARAM_BY_MODE.get(self.mode)
         if not feel_param:
-            raise TypeError(f'Mode {self.mode} does not have a feel parameter')
+            raise TypeError(f"Mode {self.mode} does not have a feel parameter")
         self._send(Command(feel_param), feel)
 
     def _set_delay(self, delay: int):
@@ -209,22 +215,22 @@ class Commander:
 
         speed_param = SPEED_PARAM_BY_MODE.get(self.mode)
         if not speed_param:
-            raise TypeError(f'Mode {self.mode} does not have a speed/delay parameter')
+            raise TypeError(f"Mode {self.mode} does not have a speed/delay parameter")
 
         self._send(Command(speed_param), speed)
 
     def set_level(self, channel, level):
-        assert channel in ['A', 'B']
+        assert channel in ["A", "B"]
         assert 0 <= level <= 100
         return self._send(Command(channel), level)
 
     def set_power(self, power):
-        assert power in ['L', 'H']
+        assert power in ["L", "H"]
         return self._send(Command(power))
 
 
 @contextmanager
-def commander(serial_port='COM3', timeout_seconds=1.0):
+def commander(serial_port=SERIAL_PORT, timeout_seconds=1.0):
     """
     The preferred way to get a Commander instance. Handles serial port
     opening/closing and performs a reset (E command) at both the start and end

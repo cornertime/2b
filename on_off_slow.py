@@ -1,17 +1,15 @@
 import logging
-from oscillator import Oscillator
-
 from random import randint
 from time import sleep
 
 from estim_2b import Mode, commander
+from oscillator import Oscillator
 from ramp import Ramp, Sequence
-
 
 logger = logging.getLogger(__name__)
 
 
-START = 50
+START = 45
 RISE = 100 - START
 
 

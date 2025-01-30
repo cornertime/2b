@@ -1,17 +1,15 @@
 import logging
-from oscillator import Oscillator
-
 from random import randint
 from time import sleep
 
 from estim_2b import Mode, commander
+from oscillator import Oscillator
 from ramp import Ramp, Sequence
-
 
 logger = logging.getLogger(__name__)
 
 
-START = 35
+START = 25
 RISE = 40
 
 
@@ -19,18 +17,18 @@ def main(
     ramp_start=START,
     ramp_end=START + RISE,
     ramp_seconds=RISE * 60,
-    speed=90,
+    speed=85,
     feel=90,
-    active_seconds_min=2,
-    active_seconds_max=6,
+    active_seconds_min=5,
+    active_seconds_max=10,
     inactive_seconds_min=5,
-    inactive_seconds_max=40,
+    inactive_seconds_max=30,
 ):
     ramp = Ramp(ramp_start, ramp_end, ramp_seconds)
 
     with commander() as cmd:
         cmd.set_power("H")
-        cmd.set_mode(Mode.WATERFALL)
+        cmd.set_mode(Mode.WAVE)
         cmd.set_speed(speed)
         cmd.set_feel(feel)
 
